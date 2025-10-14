@@ -8,42 +8,46 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "incomes")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserEntity {
+public class IncomeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
-    private String phoneNumber;
-
-    @Column(unique = true)
-    private String email;
-    private String password;
-    private String profileImageUrl;
+    private BigDecimal amount;
+    private String icon;
+    private LocalDate date;
 
     @Column(updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
-
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    private Boolean isActive;
-    private String activationToken;
 
-    // Antes de salvar no banco de dados, ele vai executar essa função
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryEntity category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
+
+
+    // Se não for passado uma data na criação, ele considera a data atual
     @PrePersist
     public void prePersist() {
-        if (this.isActive == null) {
-            isActive = false;
+        if (this.date == null) {
+            this.date = LocalDate.now();
         }
     }
-
 }

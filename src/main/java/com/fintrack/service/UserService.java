@@ -5,7 +5,9 @@ import com.fintrack.dto.UserDTO;
 import com.fintrack.entity.UserEntity;
 import com.fintrack.repository.UserRepository;
 import com.fintrack.util.JwtUtil;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,13 +29,16 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Value("${activation.url}")
+    private String activationUrl;
+
     public UserDTO registerUser(UserDTO userDTO) {
         UserEntity newUser = toEntity(userDTO);
         newUser.setActivationToken(UUID.randomUUID().toString());
         newUser = userRepository.saveAndFlush(newUser);
 
         // Mandar email de ativação
-        String activationLink = "http://localhost:8080/api/profile/activate?token=" + newUser.getActivationToken();
+        String activationLink = activationUrl + newUser.getActivationToken();
         String subject = "Ative sua conta na Fintrack e comece a organizar suas finanças!";
         String name = newUser.getName();
 
@@ -125,7 +130,17 @@ public class UserService {
                     "user", getPublicProfile(authDTO.getEmail())
             );
         } catch (Exception e) {
-            throw new RuntimeException("Email ou senha incorreta");
+            throw new RuntimeException("Email ou senha incorreta.");
+        }
+    }
+
+    public void deleteUserByEmail(String email) {
+        try {
+            userRepository.deleteByEmail(email);
+        } catch (EntityNotFoundException e) {
+            throw new UsernameNotFoundException("Usuário não encontrado com o email: " + email);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao tentar excluir o usuário", e);
         }
     }
 }

@@ -7,6 +7,7 @@ import com.fintrack.entity.UserEntity;
 import com.fintrack.repository.CategoryRepository;
 import com.fintrack.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -69,6 +70,13 @@ public class ExpenseService {
         }
 
         expenseRepository.delete(expense);
+    }
+
+    public List<ExpenseDTO> filterExpenses(LocalDate startDate, LocalDate endDate, String keyword, Sort sort) {
+        UserEntity user = userService.getCurrentUser();
+        List<ExpenseEntity> list = expenseRepository.findByUserIdAndDateBetweenAndNameContainingIgnoreCase(user.getId(), startDate, endDate, keyword, sort);
+
+        return list.stream().map(this::toDTO).toList();
     }
 
     private ExpenseEntity toEntity(ExpenseDTO expenseDTO, UserEntity user, CategoryEntity category) {

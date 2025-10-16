@@ -53,6 +53,13 @@ public class UserController {
         }
     }
 
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<?> deleteAccount() {
+        userService.deleteAccount();
+
+        return ResponseEntity.ok("Conta excluída com sucesso.");
+    }
+
     @GetMapping("/test")
     public String test() {
         return "Test successful";

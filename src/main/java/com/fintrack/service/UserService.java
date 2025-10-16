@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
@@ -134,13 +135,11 @@ public class UserService {
         }
     }
 
-    public void deleteUserByEmail(String email) {
-        try {
-            userRepository.deleteByEmail(email);
-        } catch (EntityNotFoundException e) {
-            throw new UsernameNotFoundException("Usuário não encontrado com o email: " + email);
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao tentar excluir o usuário", e);
-        }
+    @Transactional
+    public void deleteAccount() {
+        UserEntity user = getCurrentUser();
+        userRepository.delete(user);
+
+        SecurityContextHolder.clearContext();
     }
 }

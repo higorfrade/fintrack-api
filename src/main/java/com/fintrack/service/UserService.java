@@ -42,7 +42,7 @@ public class UserService {
         String subject = "Ative sua conta na Fintrack e comece a organizar suas finanças!";
         String name = newUser.getName();
 
-        emailService.sendCustomEmail(newUser.getEmail(), subject, name, activationLink);
+        emailService.sendActivationEmail(newUser.getEmail(), subject, name, activationLink, 1L);
 
 
         return toDTO(newUser);

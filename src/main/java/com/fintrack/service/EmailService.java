@@ -7,6 +7,7 @@ import brevoApi.TransactionalEmailsApi;
 import brevoModel.SendSmtpEmail;
 import brevoModel.SendSmtpEmailSender;
 import brevoModel.SendSmtpEmailTo;
+import com.fintrack.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -31,6 +32,8 @@ public class EmailService {
     @Value("${brevo.defaultSenderName}")
     private String fromName;
 
+    private Long templateId;
+
     public void sendEmail(String to, String subject, String body) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -45,7 +48,7 @@ public class EmailService {
         }
     }
 
-    public void sendCustomEmail(String toEmail, String subject, String name, String activationLink) {
+    public void sendActivationEmail(String toEmail, String subject, String name, String activationLink, Long templateId) {
         // Configuracao da API da Brevo
         ApiClient brevoClient = Configuration.getDefaultApiClient();
         brevoClient.setApiKey(brevoApiKey);
@@ -68,7 +71,6 @@ public class EmailService {
         email.setSubject(subject);
 
         // Escolhe o template criado no Brevo
-        Long templateId = 1L;
         email.setTemplateId(templateId);
 
         // Substituindo os parametros do template
@@ -83,4 +85,89 @@ public class EmailService {
             throw new RuntimeException("Erro ao enviar o e-mail: " + e.getMessage());
         }
     }
+
+    public void sendDailyReminderEmail(UserEntity user, String siteUrl, Long templateId) {
+        // Configuração da API Brevo
+        ApiClient brevoClient = Configuration.getDefaultApiClient();
+        brevoClient.setApiKey(brevoApiKey);
+
+        TransactionalEmailsApi apiInstance = new TransactionalEmailsApi(brevoClient);
+
+        // Criar o e-mail
+        SendSmtpEmail email = new SendSmtpEmail();
+
+        // Remetente
+        SendSmtpEmailSender sender = new SendSmtpEmailSender();
+        sender.setEmail(fromEmail);
+        sender.setName(fromName);
+        email.setSender(sender);
+
+        // Destinatário
+        SendSmtpEmailTo to = new SendSmtpEmailTo();
+        to.setEmail(user.getEmail());
+        email.setTo(Collections.singletonList(to));
+
+        // Assunto (opcional se definido no template)
+        email.setSubject("Lembrete diário: Adicione suas transações de hoje na Fintrack");
+
+        // ID do template Brevo
+        email.setTemplateId(templateId);
+
+        // Parâmetros dinâmicos do template
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", user.getName());
+        params.put("url", siteUrl);
+
+        email.setParams(params);
+
+        try {
+            apiInstance.sendTransacEmail(email);
+        } catch (ApiException e) {
+            throw new RuntimeException("Erro ao enviar e-mail diário: " + e.getMessage(), e);
+        }
+    }
+
+    public void sendDailyTransactionsEmail(UserEntity user, String currentDate, String tableHtml, Long templateId) {
+        // Configuração da API Brevo
+        ApiClient brevoClient = Configuration.getDefaultApiClient();
+        brevoClient.setApiKey(brevoApiKey);
+
+        TransactionalEmailsApi apiInstance = new TransactionalEmailsApi(brevoClient);
+
+        // Criar o e-mail
+        SendSmtpEmail email = new SendSmtpEmail();
+
+        // Remetente
+        SendSmtpEmailSender sender = new SendSmtpEmailSender();
+        sender.setEmail(fromEmail);
+        sender.setName(fromName);
+        email.setSender(sender);
+
+        // Destinatário
+        SendSmtpEmailTo to = new SendSmtpEmailTo();
+        to.setEmail(user.getEmail());
+        email.setTo(Collections.singletonList(to));
+
+        // Assunto (opcional se definido no template)
+        email.setSubject("Resumo das suas transações de hoje");
+
+        // ID do template Brevo
+        email.setTemplateId(templateId);
+
+        // Parâmetros dinâmicos do template
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", user.getName());
+        params.put("currentDate", currentDate);
+        params.put("table", tableHtml); // Tabela gerada como HTML via StringBuilder
+
+        email.setParams(params);
+
+        try {
+            apiInstance.sendTransacEmail(email);
+        } catch (ApiException e) {
+            throw new RuntimeException("Erro ao enviar e-mail diário: " + e.getMessage(), e);
+        }
+    }
+
+
 }

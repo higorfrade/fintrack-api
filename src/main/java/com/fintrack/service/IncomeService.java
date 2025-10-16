@@ -79,6 +79,12 @@ public class IncomeService {
         return list.stream().map(this::toDTO).toList();
     }
 
+    public List<IncomeDTO> getDailyIncomes(Long userId, LocalDate date) {
+        List<IncomeEntity> list = incomeRepository.findByUserIdAndDate(userId, date);
+
+        return list.stream().map(this::toDTO).toList();
+    }
+
     private IncomeEntity toEntity(IncomeDTO incomeDTO, UserEntity user, CategoryEntity category) {
         return IncomeEntity.builder()
                 .name(incomeDTO.getName())

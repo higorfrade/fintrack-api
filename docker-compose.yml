@@ -1,0 +1,9 @@
+services:
+  fintrack-api:
+    build: .
+    image: fintrack-api:1.0
+    container_name: fintrack-api
+    ports:
+      - "8080:8080"
+    env_file: .env
+    restart: always

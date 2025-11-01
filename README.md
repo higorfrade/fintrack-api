@@ -6,7 +6,7 @@
 
 A **Fintrack API** é um sistema de controle financeiro criado com **Spring Boot**. Esta API tem como objetivo fornecer funcionalidades para o gerenciamento de finanças pessoais e corporativas, incluindo autenticação via **JWT**, envio de e-mails usando o **Java Mail Sender** com integração ao servidor da **Brevo**, e segurança com **PasswordEncoder**.
 
-Esta API está hospedada na plataforma **Render** e pode ser acessada em: [https://fintrack-api-vymx.onrender.com/api/status](https://fintrack-api-vymx.onrender.com/api/status)
+Esta API está hospedada na plataforma **Render** e pode ser acessada em: [https://fintrack-api-vymx.onrender.com/api](https://fintrack-api-vymx.onrender.com/api)
 
 ---
 

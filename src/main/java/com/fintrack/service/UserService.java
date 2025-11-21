@@ -91,6 +91,10 @@ public class UserService {
                 .orElse(false);
     }
 
+    public boolean doesAccountExist(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
     // Retorna o usuário atual
     public UserEntity getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

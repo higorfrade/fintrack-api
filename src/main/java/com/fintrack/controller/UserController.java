@@ -37,6 +37,13 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthenticationDTO authDTO) {
         try {
+            // Verifica se a conta existe
+            if (!userService.doesAccountExist(authDTO.getEmail())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                        "message", "Essa conta não existe. Cadastre-se antes de acessar a plataforma."
+                ));
+            }
+
             // Verifica se o perfil está ativo ou não
             if (!userService.isAccountActive(authDTO.getEmail())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
@@ -63,5 +70,12 @@ public class UserController {
     @GetMapping("/test")
     public String test() {
         return "Test successful";
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getPublicProfile() {
+        UserDTO userDTO = userService.getPublicProfile(null);
+
+        return ResponseEntity.ok(userDTO);
     }
 }

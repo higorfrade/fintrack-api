@@ -2,6 +2,7 @@ package com.fintrack.service;
 
 import com.fintrack.dto.CategoryDTO;
 import com.fintrack.entity.CategoryEntity;
+import com.fintrack.entity.IncomeEntity;
 import com.fintrack.entity.UserEntity;
 import com.fintrack.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,19 @@ public class CategoryService {
         category = categoryRepository.saveAndFlush(category);
 
         return toDTO(category);
+    }
+
+    public void deleteCategory(Long categoryId) {
+        UserEntity user = userService.getCurrentUser();
+
+        CategoryEntity category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
+        if (!category.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Exclusão de categoria não permitida");
+        }
+
+        categoryRepository.delete(category);
     }
 
     private CategoryEntity toEntity(CategoryDTO categoryDTO, UserEntity user) {

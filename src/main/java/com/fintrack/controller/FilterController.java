@@ -33,11 +33,11 @@ public class FilterController {
         Sort.Direction order = "desc".equalsIgnoreCase(filter.getSortOrder()) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(order, sortField);
 
-        if ("income".equalsIgnoreCase(filter.getType())) {
+        if ("income".equalsIgnoreCase(filter.getType()) || "receita".equalsIgnoreCase(filter.getType())) {
             List<IncomeDTO> incomes = incomeService.filterIncomes(startDate, endDate, keyword, sort);
             
             return ResponseEntity.ok(incomes);
-        } else if ("expense".equalsIgnoreCase(filter.getType())) {
+        } else if ("expense".equalsIgnoreCase(filter.getType()) || "despesa".equalsIgnoreCase(filter.getType())) {
             List<ExpenseDTO> expenses = expenseService.filterExpenses(startDate, endDate, keyword, sort);
 
             return ResponseEntity.ok(expenses);

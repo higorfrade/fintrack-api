@@ -67,6 +67,37 @@ public class UserController {
         return ResponseEntity.ok("Conta excluída com sucesso.");
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        try {
+            userService.forgotPassword(request.get("email"));
+            return ResponseEntity.ok(Map.of("message", "E-mail de recuperação enviado!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            userService.resetPassword(request.get("token"), request.get("password"));
+            return ResponseEntity.ok(Map.of("message", "Senha alterada com sucesso!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/update-image")
+    public ResponseEntity<UserDTO> updateProfileImage(@RequestBody Map<String, String> request) {
+        UserDTO updatedUser = userService.updateProfileImage(request.get("imageUrl"));
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PutMapping("/update-details")
+    public ResponseEntity<UserDTO> updateUserDetails(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.updateUserDetails(userDTO));
+    }
+
     @GetMapping("/test")
     public String test() {
         return "Test successful";

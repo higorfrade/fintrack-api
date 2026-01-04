@@ -173,6 +173,37 @@ public class EmailService {
         }
     }
 
+    public void sendResetPassEmail(String toEmail, String subject, String resetLink, Long templateId) {
+        ApiClient brevoClient = Configuration.getDefaultApiClient();
+        brevoClient.setApiKey(brevoApiKey);
+
+        TransactionalEmailsApi apiInstance = new TransactionalEmailsApi(brevoClient);
+
+        SendSmtpEmail email = new SendSmtpEmail();
+        SendSmtpEmailSender sender = new SendSmtpEmailSender();
+        sender.setEmail(fromEmail);
+        sender.setName(fromName);
+        email.setSender(sender);
+
+        SendSmtpEmailTo to = new SendSmtpEmailTo();
+        to.setEmail(toEmail);
+        email.setTo(Collections.singletonList(to));
+
+        email.setSubject(subject);
+
+        email.setTemplateId(templateId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("resetLink", resetLink);
+        email.setParams(params);
+
+        try {
+            apiInstance.sendTransacEmail(email);
+        } catch (ApiException e) {
+            throw new RuntimeException("Erro ao enviar o e-mail: " + e.getMessage());
+        }
+    }
+
     // Destinatário, Assunto, Corpo, Arquivo em forma de Array de Bytes (PDF, Excel), Nome do arquivo no anexo
     public void sendExcelEmail(String to, String subject, String body, byte[] attachment, String filename) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();

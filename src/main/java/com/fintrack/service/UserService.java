@@ -33,6 +33,9 @@ public class UserService {
     @Value("${activation.url}")
     private String activationUrl;
 
+    @Value("${reset.password.url}")
+    private String resetUrl;
+
     public UserDTO registerUser(UserDTO userDTO) {
         UserEntity newUser = toEntity(userDTO);
         newUser.setActivationToken(UUID.randomUUID().toString());
@@ -145,5 +148,48 @@ public class UserService {
         userRepository.delete(user);
 
         SecurityContextHolder.clearContext();
+    }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado."));
+
+        String resetToken = UUID.randomUUID().toString();
+        user.setActivationToken(resetToken);
+        userRepository.saveAndFlush(user);
+
+        String resetLink = resetUrl + resetToken;
+        String subject = "Recuperação de Senha - Fintrack";
+
+        emailService.sendResetPassEmail(user.getEmail(), subject, resetLink, 3L);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        UserEntity user = userRepository.findByActivationToken(token)
+                .orElseThrow(() -> new RuntimeException("Token inválido ou expirado."));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setActivationToken(null);
+        userRepository.saveAndFlush(user);
+    }
+
+    @Transactional
+    public UserDTO updateProfileImage(String imageUrl) {
+        UserEntity user = getCurrentUser();
+        user.setProfileImageUrl(imageUrl);
+        userRepository.saveAndFlush(user);
+        return toDTO(user);
+    }
+
+    @Transactional
+    public UserDTO updateUserDetails(UserDTO updateDTO) {
+        UserEntity user = getCurrentUser();
+        if (updateDTO.getName() != null) user.setName(updateDTO.getName());
+        if (updateDTO.getPhoneNumber() != null) user.setPhoneNumber(updateDTO.getPhoneNumber());
+
+        userRepository.saveAndFlush(user);
+        return toDTO(user);
     }
 }
